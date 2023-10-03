@@ -8,7 +8,7 @@ A command-line interface to fetch the count of open pull requests from a specifi
 2. You will need the `requests` library. Install it using:
    ```bash
    pip install requests
-   For Mac users, please use:
+For Mac users, please use:
     ```bash
    pip3 install requests
 
@@ -17,6 +17,6 @@ A command-line interface to fetch the count of open pull requests from a specifi
 2. Run the CLI using:
    ```bash
    python cli.py
-   For Mac users, please use:
+For Mac users, please use:
     ```bash
    python3 cli.py
