@@ -16,7 +16,6 @@ def check_rate_limit():
     remaining = response.json()["resources"]["core"]["remaining"]
     return remaining
 
-
 def get_repo_info(owner, repo):
     # check the rate limit for the GitHub API.
     if check_rate_limit() == 0:
@@ -29,18 +28,20 @@ def get_repo_info(owner, repo):
     if response.status_code != 200:
         print(f"Error: Unable to fetch data from {owner}/{repo}. Error Code is {response.status_code}")
         return None
+    
+    # If there's no link header, return the count of the current page
+    if 'link' not in response.headers:
+        return len(response.json())
 
-    #Check if the link is in the header. If it doesn't exist, it means all results are on the first page
-    if 'link' in response.headers:
-        links = response.headers['link'].split(',')
-        for link in links:
-            if 'rel="last"' in link:
-                last_url = link.split(';')[0].strip('>')
-                last_page_num = last_url.split('=')[-1]
-                return last_page_num
-        
-    return len(response.json())
+    #Check for pagination
+    links = response.headers['link'].split(',')
+    for link in links:
+        if 'rel="last"' in link:
+            last_url = link.split(';')[0].strip('>')
+            last_page_num = last_url.split('=')[-1]
+            return last_page_num
 
+    
 
 def main():
     print("Welcome to Multitudes CLI! Let’s process some Github Data!")
@@ -49,10 +50,20 @@ def main():
     print(f"Excellent! Querying {owner}/{repo} for open PRs!")
 
     count = get_repo_info(owner, repo)
-    if count != 0:
+    if count is None:
+        print("There was a problem querying the repo.")
+    elif count == 0:
+        print(f"There are no open pull requests for {owner}/{repo}.")
+    else:
         print(f"# of open PRs: {count}")
     print("Bye")
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+    
