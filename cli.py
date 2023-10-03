@@ -1,9 +1,28 @@
 import requests
 
+# Cute ASCII Art
+print("""
+  /\_/\  
+ ( o.o )
+  > ^ <                               
+""")
+
 # Define the base URL for the GitHub API's pull requests endpoint.
 BASE_URL = "https://api.github.com/repos/{owner}/{repo}/pulls"
+RATE_LIMIT_URL = "https://api.github.com/rate_limit"
+
+def check_rate_limit():
+    response = requests.get(RATE_LIMIT_URL)
+    remaining = response.json()["resources"]["core"]["remaining"]
+    return remaining
+
 
 def get_repo_info(owner, repo):
+    # check the rate limit for the GitHub API.
+    if check_rate_limit() == 0:
+        print("Rate limit exceeded! Please wait before making more requests.")
+        return None
+
     url = BASE_URL.format(owner=owner, repo=repo)
     response = requests.get(url, params={'state': 'open', 'per_page': 1}) # request only 1 item to minimise data transfer and mainly check for pagination.
 
@@ -21,7 +40,7 @@ def get_repo_info(owner, repo):
                 return last_page_num
         
     return len(response.json())
-    
+
 
 def main():
     print("Welcome to Multitudes CLI! Let’s process some Github Data!")
@@ -37,9 +56,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-    
